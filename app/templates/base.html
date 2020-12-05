@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#9def9d">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/style.css">
+    {{ moment.include_jquery() }}
+    {{ moment.include_moment() }}
+    {{ moment.locale("ru") }}
+    <title>{{ title }}</title>
+</head>
+<body class="image_logo">
+<nav class="navbar navbar-expand-xl sticky-top navbar-light bg-light mx-auto">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Instablog</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <div style="font-size: 150%; color: #22b53e"><i class="fas fa-ellipsis-v"></i></div>
+    </button>
+
+    <div class="container-fluid justify-content-center">
+        <div class="row">
+            <div class="col">
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav align-center d-xs-inline d-sm-flex flex-md-row">
+                        <li class="nav-item">
+                            <a href="{{ url_for('index') }}" class="nav-link mx-md-4">Главная</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('post_all') }}" class="nav-link mx-md-4">Публикации <i class="fas fa-clipboard"></i></a>
+                        </li>
+                        {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('create_post') }}" class="nav-link mx-md-4">Написать
+                                пост <i class="fas fa-edit"></i></a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link mx-md-4" id="categories-load" data-toggle="modal"
+                               data-target="#exampleModal">
+                                Категории <i class="fas fa-list"></i>
+                            </a>
+                        </li>
+                        {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                        <a id="user" class="nav-link mx-md-4"> {{ current_user.name }} <i class="fas fa-user"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('logout') }}" class="nav-link mx-md-4">Выйти <i class="fas fa-door-open"></i></a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('sign_up') }}" class="nav-link mx-md-4">Регистрация</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('login') }}" class="nav-link mx-md-4">Войти <i class="fas fa-sign-in-alt"></i></a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <form class="form-inline my-2 my-lg-0 mx-md-4 justify-content-center" method="get"
+                          action="{{ url_for('search') }}">
+                        {{ g.search_form.q(size=20, class='form-control mr-sm-2',
+                        placeholder=g.search_form.q.label.text) }}
+                        <button class="btn btn-outline-success my-2 my-sm-0 custom-width" type="submit">Найти</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container p-3 ">
+    {% if error %}
+    <div class="alert alert-warning mt-3">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock content %}
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Доступные категории</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="categories">
+                <a class="" href="#"></a>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js"></script>
+<script>
+        let loadedCategories = document.getElementById('categories');
+        document.getElementById('categories-load').addEventListener('click', e => {
+            fetch('/api/v1/category')
+                .then(response => response.json())
+                .then(json => {
+                    loadedCategories.innerHTML = '';
+                    for (let category of json) {
+                        loadedCategories.innerHTML += `<a class="dropdown-item" href="/category/${category.name}"> \
+                        ${category.alias}</a>`
+                    }
+
+                })
+        })
+
+
+
+
+</script>
+{% block script_src %} {% endblock script_src %}
+</body>
+</html>

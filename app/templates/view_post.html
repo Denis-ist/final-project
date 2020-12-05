@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col">
+        <div class="card p-2">
+            <h1 class="card-title mb-3">{{ post.heading }}</h1>
+            <h3 class="card-title lead">
+                Опубликовал {{ post.author.name }}
+
+                {{ moment(post.date_created).fromNow() }}
+
+                {% if post.category.name %}
+                в категории <a href="{{ url_for('view_category', name=post.category.name) }}">«{{ post.category.alias
+                }}»</a>
+                {% endif %}
+            </h3>
+            <hr class="my-1">
+            <p class="card-text lead">{{ post.text | safe }}</p>
+        </div>
+        <hr class="my-4">
+        <div class="card">
+            <div class="card-header">
+                {% if current_user.id == post.author_id %}
+                <a type="button" class="btn btn-success custom-width m-2"
+                   href="{{url_for('edit_post', id_post=post.id)}}"> Редактировать</a>
+                {% endif %}
+                <button class="btn btn-success custom-width m-2" id="load-articles">Загрузить еще публикации?</button>
+                <button type="button" class="btn btn-success custom-width m-2" data-toggle="modal"
+                        data-target="#view_comments">
+                    Комментарии {{ post.comment_counter }}
+                </button>
+            </div>
+        </div>
+        <div class="list-group" id="loaded-articles"></div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="view_comments"   data-keyboard="false" tabindex="-1" role="dialog"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel1">Комментарии</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for comment in comments %}
+                        {% for user in users %}
+                            {% if comment.author_id == user.id %}
+                                <small class="form-text text-muted">{{ user.name }} {{ moment(comment.date_created).fromNow() }}:</small>
+                            {% endif %}
+                        {% endfor %}
+                    <li class="list-group-item">{{ comment.text }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success custom-width m-2" data-toggle="modal"
+                        data-target="#create_comment">
+                    Комментировать
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="create_comment" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Ваш комментарий</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.text(class='form-control') }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {{ form.submit(class="btn btn-large btn-success") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script_src %}
+<script>
+        let loadedPosts = document.getElementById('loaded-articles');
+        document.getElementById('load-articles').addEventListener('click', e => {
+            fetch('/api/v1/posts')
+                .then(response => response.json())
+                .then(json => {
+                    loadedPosts.innerHTML = '';
+                    for (let post of json) {
+                        loadedPosts.innerHTML += `<a href="${post.id}"><div class="list-group-item text-muted"> \
+                                                  <strong>${post.title}</strong> - ${post.body}</div></a>`
+                    }
+                })
+        })
+
+
+</script>
+{% endblock %}

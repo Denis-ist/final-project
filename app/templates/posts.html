@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if category is defined %}
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container ">
+        <div class="row">
+            <div class="col">
+                <h1 class="display-4">{{ category.alias }}</h1>
+                <p class="lead">{{ category.description }}</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endif %}
+<div class="row">
+    {% for post in posts.items %}
+
+    <div class="col-sm-4 col-md-6 col-lg-6 col-xl-4 p-1">
+        <div class="card ml-auto opacity ">
+            <div class="card-header bg-success text-light">
+                {{ post.heading | upper }}
+                {% if show_category %}
+                <a href="{{ url_for('view_category', name=post.category.name) }}">
+                    <span class="badge badge-light">{{ post.category.alias }}</span>
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body opacity">
+                <blockquote class="blockquote mb-0">
+                    <p>{{ post.intro_text }}</p>
+                    <footer class="blockquote-footer">
+                        Опубликовал <cite>{{ post.author.name }}
+                        <p>{{ moment(post.date_created).format("LL") }}</p></cite></footer>
+                </blockquote>
+                <p class="m-0">
+                    <i class="far fa-eye"></i> {{ post.view_counter }}
+                    <i class="far fa-comments"></i> {{ post.comment_counter }}
+                </p>
+                <a href="{{ url_for('view_post', id_post=post.id) }}" class="btn btn-outline-success
+                mt-3 custom-width w-100">Читать далее...</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+<br>
+<div class="row justify-content-center">
+    {{ pagination.links }}
+</div>
+
+
+{% endblock content %}

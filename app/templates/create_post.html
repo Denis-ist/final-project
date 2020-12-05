@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.heading.label }}
+        {{ form.heading(class='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ form.category.label }}
+        {{ form.category(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.text.label }}
+        {{ form.text(class="form-control") }}
+        <small id="textHelp" class="form-text text-muted">Напишите здесь какой-нибудь текст</small>
+    </div>
+    {% for error in form.text.errors %}
+    <div class="alert alert-warning" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {{ form.submit(class="btn btn-large btn-success") }}
+</form>
+
+{{ ckeditor.load() }}
+{{ ckeditor.config(name='text') }}
+<script>
+    CKEDITOR.config.filebrowserBrowseUrl  = '/upload';
+</script>
+{% endblock content %}

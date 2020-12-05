@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if posts.count() > 0 %}
+<h1>Результаты поиска по вашему запросу:</h1>
+<div class="row">
+    {% for post in posts %}
+    <div class="col-sm-4 col-md-6 col-lg-6 col-xl-4 p-1">
+        <div class="card ml-auto">
+            <div class="card-header bg-success text-light">
+                {{ post.heading | upper }}
+                <a href="{{ url_for('view_category', name=post.category.name) }}">
+                    <span class="badge badge-light">{{ post.category.alias }}</span>
+                </a>
+            </div>
+            <div class="card-body">
+                <blockquote class="blockquote mb-0">
+                    <p>{{ post.intro_text }}</p>
+                    <footer class="blockquote-footer">
+                        Опубликовал <cite>{{ post.author.name }}
+                        <p>{{ moment(post.date_created).format("LL") }}</p></cite></footer>
+                </blockquote>
+                <i class="far fa-eye"></i> {{ post.view_counter }}
+                <i class="far fa-comments"></i> {{ post.comment_counter }}
+                </p>
+                <a href="{{ url_for('view_post', id_post=post.id) }}"
+                   class="btn btn-outline-success custom-width w-100 mt-3">Читать далее...
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="container float-left">
+    <i class="far fa-frown "></i>
+    <h1>УПС! Ничего не найдено! Попробуйте сформулировать вопрос иначе.</h1>
+</div>
+{% endif %}
+
+{% endblock content %}

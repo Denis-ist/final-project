@@ -1,0 +1,48 @@
+.image_logo{
+    background-image: url('/static/images/background.jpg');
+    background-size: 100%;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+}
+.opacity{
+opacity: 0.85;
+transition: ease-in 0.5s;
+}
+.opacity:hover {
+opacity: 1;
+}
+#main_container{
+    position: relative;
+
+}
+#card_reg, #card_log{
+    position: absolute;
+    top:25vh;
+}
+@media (max-width: 575px) {
+#card_reg{
+    position: absolute;
+    top:10vh;
+}
+#card_log{
+position: absolute;
+    top:20vh;
+}
+.custom-width{
+width:100%
+}
+}
+.fas fa-ellipsis-v {
+    color:green;
+    }
+.fa-frown{
+font-size: 20vh;
+text-align: center;
+}
+page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}

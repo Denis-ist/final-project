@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--<form action="" method="post">-->
+<!--    {{ form.hidden_tag() }}-->
+<!--    <div class="form-group">-->
+<!--        {{ form.text.label }}-->
+<!--        {{ form.text(class='form-control') }}-->
+<!--    </div>-->
+<!--    {{ form.submit(class="btn btn-large btn-success") }}-->
+<!--</form>-->
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_comment">
+    Комментировать
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="create_comment" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Ваш комментарий</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="" method="post">
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.text.label }}
+                        {{ form.text(class='form-control') }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    {{ form.submit(class="btn btn-large btn-success", data-dismiss="modal") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
