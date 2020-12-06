@@ -31,6 +31,22 @@
     </div>
     {% endfor %}
 </div>
+<div class="row">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}" class="page-link">Назад
+                    <span aria-hidden="true">&larr;</span>
+                </a>
+            </li>
+            <li class="page-item next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}" class="page-link">Далее
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 {% else %}
 <div class="container float-left">
     <i class="far fa-frown "></i>

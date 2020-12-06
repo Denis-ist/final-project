@@ -49,7 +49,7 @@ def load_user(ids):
 
 
 @app.errorhandler(401)
-def redirect_for_unauthenticated(e):
+def redirect_for_unauthenticated(error):
     return redirect(url_for("login"))
 
 
@@ -67,6 +67,8 @@ def search():
 
 @app.route('/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('view_personal', id_user=current_user.id))
     return render_template('index.html')
 
 
@@ -90,6 +92,14 @@ def view_post(id_post):
     db.session.commit()
     comments = Comments.query.filter(Comments.post_id == post.id).order_by(Comments.id.desc())  # post.comment
     return render_template('view_post.html', post=post, comments=comments, form=form, users=users)
+
+
+@app.route('/user/<int:id_user>')
+@login_required
+def view_personal(id_user):
+    posts = Post.query.filter(Post.author_id == current_user.id).order_by(Post.id.desc())
+    user = User.query.get(id_user)
+    return render_template('personal.html', posts=posts, user=user, show_category=True)
 
 
 @app.route('/posts/<int:id_post>', methods=['GET', 'POST'])
