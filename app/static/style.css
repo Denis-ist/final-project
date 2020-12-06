@@ -40,9 +40,20 @@ width:100%
 font-size: 20vh;
 text-align: center;
 }
-page-item.active .page-link {
+.page-item.active .page-link {
     z-index: 3;
     color: #fff;
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: #40af3d;
+    border-color: #40af3d;
+    }
+.page-link {
+    color: #40af3d;
+    border: 1px solid #40af3d;
+}
+.active {
+    background-color: #40af3d;
+    border: 1px solid #40af3d;
+}
+#remember_me {
+    background-color: #40af3d;
 }

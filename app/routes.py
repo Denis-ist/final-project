@@ -69,7 +69,7 @@ def search():
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('view_personal', id_user=current_user.id))
-    return render_template('index.html')
+    return render_template('index.html', title='Добро пожаловать!')
 
 
 @app.route('/posts')
@@ -78,7 +78,7 @@ def post_all():
     posts = Post.query.order_by(Post.id.desc()).paginate(page, 10)
     pagination = Pagination(page=page, total=len(Post.query.all()), css_framework='bootstrap4',
                             per_page=10, )
-    return render_template('posts.html', posts=posts, pagination=pagination, show_category=True)
+    return render_template('posts.html', posts=posts, pagination=pagination, show_category=True, title='Все публикации')
 
 
 @app.route('/posts/<int:id_post>')
@@ -91,7 +91,7 @@ def view_post(id_post):
     post.view_counter += 1
     db.session.commit()
     comments = Comments.query.filter(Comments.post_id == post.id).order_by(Comments.id.desc())  # post.comment
-    return render_template('view_post.html', post=post, comments=comments, form=form, users=users)
+    return render_template('view_post.html', post=post, comments=comments, form=form, users=users, title='Просмотр')
 
 
 @app.route('/user/<int:id_user>')
@@ -99,7 +99,7 @@ def view_post(id_post):
 def view_personal(id_user):
     posts = Post.query.filter(Post.author_id == current_user.id).order_by(Post.id.desc())
     user = User.query.get(id_user)
-    return render_template('personal.html', posts=posts, user=user, show_category=True)
+    return render_template('personal.html', posts=posts, user=user, show_category=True, title='Личная страница')
 
 
 @app.route('/posts/<int:id_post>', methods=['GET', 'POST'])
@@ -132,7 +132,8 @@ def view_category(name):
     pagination = Pagination(page=page, total=Post.query.filter(Post.category == category).count(),
                             css_framework='bootstrap4',
                             per_page=9, )
-    return render_template('posts.html', posts=posts, pagination=pagination, category=category, show_category=False)
+    return render_template('posts.html', posts=posts, pagination=pagination, category=category, show_category=False,
+                           title='Категории')
 
 
 @app.route('/new', methods=['GET', 'POST'])
@@ -165,7 +166,7 @@ def create_post():
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('post_all'))
-    return render_template('create_post.html', form=form)
+    return render_template('create_post.html', form=form, title='Новая запись')
 
 
 @app.route('/posts/<int:id_post>/edit', methods=['GET', 'POST'])
@@ -198,7 +199,7 @@ def edit_post(id_post):
             db.session.commit()
             return redirect(url_for('view_post', id_post=id_post))
         return render_template('create_post.html', form=form)
-    return redirect(url_for('view_post', id_post=id_post))
+    return redirect(url_for('view_post', id_post=id_post, title='Редактирование'))
 
 
 @app.route('/sign-up', methods=['GET', 'POST'])
@@ -217,7 +218,7 @@ def sign_up():
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
-    return render_template('registration.html', form=form)
+    return render_template('registration.html', form=form, title='Регистрация')
 
 
 @app.route('/login', methods=['GET', 'POST'])
