@@ -18,3 +18,4 @@ class Config:
     POSTS_PER_PAGE = 10
     CKEDITOR_ENABLE_CSRF = True
     CKEDITOR_FILE_UPLOADER = 'upload'
+    UPLOADED_PATH = os.path.join(basedir, 'app/uploads')

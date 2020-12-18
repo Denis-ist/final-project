@@ -30,7 +30,8 @@ class LoginForm(FlaskForm):
 
 class PostForm(FlaskForm):
     heading = StringField('Заголовок статьи', validators=[DataRequired(message="Заголовок обязателен!"),
-                                                         Length(min=3, message="Минимум три символа в заголовке")])
+                                                          Length(min=5, max=50,
+                                                                 message="Минимум 5 символов и не более 50")])
     category_list = Category.query.all()
     choices = []
     for category in category_list:

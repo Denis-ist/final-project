@@ -7,6 +7,11 @@
         {{ form.heading.label }}
         {{ form.heading(class='form-control') }}
     </div>
+    {% for error in form.heading.errors %}
+    <div class="alert alert-warning" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
     <div class="form-group">
         {{ form.category.label }}
         {{ form.category(class="form-control") }}
@@ -23,10 +28,7 @@
     {% endfor %}
     {{ form.submit(class="btn btn-large btn-success") }}
 </form>
-
 {{ ckeditor.load() }}
 {{ ckeditor.config(name='text') }}
-<script>
-    CKEDITOR.config.filebrowserBrowseUrl  = '/upload';
-</script>
+
 {% endblock content %}

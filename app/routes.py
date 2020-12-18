@@ -14,26 +14,7 @@ from flask_ckeditor import upload_success, upload_fail
 import uuid
 
 
-@app.route('/files/<path:filename>')
-def uploaded_files(filename):
-    path = '/uploaded/'
-    return send_from_directory(path, filename)
-
-
-@app.route('/upload', methods=['POST'])
-@csrf.exempt
-def upload():
-    f = request.files.get('upload')
-    extension = f.filename.split('.')[-1].lower()
-    if extension not in ['jpg', 'gif', 'png', 'jpeg']:
-        return upload_fail(message='Image only!')
-    unique_filename = str(uuid.uuid4())
-    f.filename = unique_filename + '.' + extension
-    f.save(os.path.join('/uploaded/', f.filename))
-    url = url_for('uploaded_files', filename=f.filename)
-    return upload_success(url=url)  # return upload_success call
-
-
+# *** Перед запросом ***
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -53,25 +34,17 @@ def redirect_for_unauthenticated(error):
     return redirect(url_for("login"))
 
 
-@app.route('/search')
-def search():
-    page = request.args.get('page', 1, type=int)
-    posts, total = Post.search(g.search_form.q.data, page, 6)
-    next_url = url_for('search', q=g.search_form.q.data, page=page + 1) \
-        if total > page * 10 else None
-    prev_url = url_for('search', q=g.search_form.q.data, page=page - 1) \
-        if page > 1 else None
-    return render_template('search.html', title=_l('Search'), posts=posts,
-                           next_url=next_url, prev_url=prev_url)
-
-
+# ******
+# *** Главная страница ***
 @app.route('/')
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('view_personal', id_user=current_user.id))
-    return render_template('index.html', title='Добро пожаловать!')
+    return render_template('index.html', title='InstaBlog')
 
 
+# ******
+# *** Публикации ***
 @app.route('/posts')
 def post_all():
     page = request.args.get('page', 1, type=int)
@@ -94,48 +67,8 @@ def view_post(id_post):
     return render_template('view_post.html', post=post, comments=comments, form=form, users=users, title='Просмотр')
 
 
-@app.route('/user/<int:id_user>')
-@login_required
-def view_personal(id_user):
-    posts = Post.query.filter(Post.author_id == current_user.id).order_by(Post.id.desc())
-    user = User.query.get(id_user)
-    return render_template('personal.html', posts=posts, user=user, show_category=True, title='Личная страница')
-
-
-@app.route('/posts/<int:id_post>', methods=['GET', 'POST'])
-@login_required
-def create_comment(id_post):
-    form = CommentForm()
-    if form.validate_on_submit():
-        user = User.query.filter(User.email == current_user.email).one()
-        post = Post.query.get(id_post)
-        new_comment = Comments(
-            text=form.text.data,
-            date_created=datetime.now() - timedelta(hours=3),
-            author_id=user.id,
-            post_id=post.id
-        )
-        db.session.add(new_comment)
-        if post.comment_counter is None:
-            post.comment_counter = 0
-        post.comment_counter += 1
-        db.session.commit()
-        return redirect(url_for('view_post', id_post=post.id))
-    return form
-
-
-@app.route('/category/<string:name>')
-def view_category(name):
-    category = Category.query.filter_by(name=name).one()
-    page = request.args.get('page', 1, type=int)
-    posts = Post.query.filter(Post.category == category).order_by(Post.id.desc()).paginate(page, 9)
-    pagination = Pagination(page=page, total=Post.query.filter(Post.category == category).count(),
-                            css_framework='bootstrap4',
-                            per_page=9, )
-    return render_template('posts.html', posts=posts, pagination=pagination, category=category, show_category=False,
-                           title='Категории')
-
-
+# ******
+# *** Написать пост ***
 @app.route('/new', methods=['GET', 'POST'])
 @login_required
 def create_post():
@@ -202,6 +135,75 @@ def edit_post(id_post):
     return redirect(url_for('view_post', id_post=id_post, title='Редактирование'))
 
 
+@app.route('/posts/<int:id_post>', methods=['GET', 'POST'])
+@login_required
+def create_comment(id_post):
+    form = CommentForm()
+    if form.validate_on_submit():
+        user = User.query.filter(User.email == current_user.email).one()
+        post = Post.query.get(id_post)
+        new_comment = Comments(
+            text=form.text.data,
+            date_created=datetime.now() - timedelta(hours=3),
+            author_id=user.id,
+            post_id=post.id
+        )
+        db.session.add(new_comment)
+        if post.comment_counter is None:
+            post.comment_counter = 0
+        post.comment_counter += 1
+        db.session.commit()
+        return redirect(url_for('view_post', id_post=post.id))
+    return form
+
+
+@app.route('/files/<filename>')
+def uploaded_files(filename):
+    path = app.config['UPLOADED_PATH']
+    return send_from_directory(path, filename)
+
+
+@app.route('/upload', methods=['POST'])
+@csrf.exempt
+def upload():
+    f = request.files.get('upload')
+    extension = f.filename.split('.')[-1].lower()
+    if extension not in ['jpg', 'gif', 'png', 'jpeg']:
+        return upload_fail(message='Image only!')
+    unique_filename = str(uuid.uuid4())
+    f.filename = unique_filename + '.' + extension
+    f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
+    url = url_for('uploaded_files', filename=f.filename)
+    return upload_success(url=url)  # return upload_success call
+
+
+# ******
+# *** Просмотр и выбор категорий ***
+@app.route('/category/<string:name>')
+def view_category(name):
+    category = Category.query.filter_by(name=name).one()
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.filter(Post.category == category).order_by(Post.id.desc()).paginate(page, 9)
+    pagination = Pagination(page=page, total=Post.query.filter(Post.category == category).count(),
+                            css_framework='bootstrap4',
+                            per_page=9, )
+    return render_template('posts.html', posts=posts, pagination=pagination, category=category, show_category=False,
+                           title='Категории')
+
+
+# ******
+
+# *** Личный кабинет ***
+@app.route('/user/<int:id_user>')
+@login_required
+def view_personal(id_user):
+    posts = Post.query.filter(Post.author_id == current_user.id).order_by(Post.id.desc())
+    user = User.query.get(id_user)
+    return render_template('personal.html', posts=posts, user=user, show_category=True, title='Личная страница')
+
+
+# ******
+# *** Регистрация ***
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     form = RegistrationForm()
@@ -221,6 +223,8 @@ def sign_up():
     return render_template('registration.html', form=form, title='Регистрация')
 
 
+# ******
+# *** Авторизация ***
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -241,7 +245,24 @@ def login():
     return render_template('login.html', title='Войти на сайт', form=form, error=error)
 
 
+# ******
+# *** Выход ***
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+# ******
+# *** Поисковая система - использован Elasticsearch ***
+@app.route('/search')
+def search():
+    page = request.args.get('page', 1, type=int)
+    posts, total = Post.search(g.search_form.q.data, page, 6)
+    next_url = url_for('search', q=g.search_form.q.data, page=page + 1) \
+        if total > page * 10 else None
+    prev_url = url_for('search', q=g.search_form.q.data, page=page - 1) \
+        if page > 1 else None
+    return render_template('search.html', title=_l('Search'), posts=posts,
+                           next_url=next_url, prev_url=prev_url)
+# ******
